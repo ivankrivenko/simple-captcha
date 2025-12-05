@@ -225,8 +225,10 @@ class Simple_Captcha {
             imagealphablending( $digit_img, true );
             imagesavealpha( $digit_img, true );
 
-            $pos = $positions[ $index ];
-            imagecopy( $canvas, $digit_img, $pos['x'], $pos['y'], 0, 0, imagesx( $digit_img ), imagesy( $digit_img ) );
+            $pos_x = $positions[ $index ];
+            $pos_y = $this->calculate_vertical_center( $canvas, $digit_img );
+
+            imagecopy( $canvas, $digit_img, $pos_x, $pos_y, 0, 0, imagesx( $digit_img ), imagesy( $digit_img ) );
             imagedestroy( $digit_img );
         }
 
@@ -279,22 +281,24 @@ class Simple_Captcha {
 
     private function calculate_positions( $canvas, $length ) {
         $width           = imagesx( $canvas );
-        $height          = imagesy( $canvas );
         $padding         = 10;
         $available_width = $width - ( 2 * $padding );
         $gap             = floor( $available_width / $length );
-        $center_y        = max( 0, ( $height / 2 ) - 12 );
 
         $positions = array();
 
         for ( $i = 0; $i < $length; $i++ ) {
-            $positions[] = array(
-                'x' => $padding + ( $i * $gap ),
-                'y' => (int) $center_y,
-            );
+            $positions[] = $padding + ( $i * $gap );
         }
 
         return $positions;
+    }
+
+    private function calculate_vertical_center( $canvas, $digit_img ) {
+        $canvas_height = imagesy( $canvas );
+        $digit_height  = imagesy( $digit_img );
+
+        return (int) max( 0, ( $canvas_height - $digit_height ) / 2 );
     }
 
     private function store_captcha( $image_name, $code ) {
