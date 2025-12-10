@@ -60,14 +60,38 @@ array( $this, 'render_digit_dir_field' ),
 'scaptcha_main'
 );
 
-add_settings_field(
-'bg_directory',
-__( 'Папка с фонами', 'scaptcha' ),
-array( $this, 'render_bg_dir_field' ),
-'scaptcha-settings',
-'scaptcha_main'
-);
-}
+        add_settings_field(
+            'bg_directory',
+            __( 'Папка с фонами', 'scaptcha' ),
+            array( $this, 'render_bg_dir_field' ),
+            'scaptcha-settings',
+            'scaptcha_main'
+        );
+
+        add_settings_field(
+            'enable_wp_login',
+            __( 'Включить для wp-login.php', 'scaptcha' ),
+            array( $this, 'render_enable_wp_login_field' ),
+            'scaptcha-settings',
+            'scaptcha_main'
+        );
+
+        add_settings_field(
+            'enable_wc_registration',
+            __( 'Включить для регистрации WooCommerce', 'scaptcha' ),
+            array( $this, 'render_enable_wc_registration_field' ),
+            'scaptcha-settings',
+            'scaptcha_main'
+        );
+
+        add_settings_field(
+            'enable_password_reset',
+            __( 'Включить для сброса пароля', 'scaptcha' ),
+            array( $this, 'render_enable_password_reset_field' ),
+            'scaptcha-settings',
+            'scaptcha_main'
+        );
+    }
 
 public function sanitize_options( $input ) {
 $output = $this->plugin->get_options();
@@ -84,9 +108,13 @@ if ( isset( $input['digit_directory'] ) ) {
 $output['digit_directory'] = rtrim( sanitize_text_field( $input['digit_directory'] ), '/\\' );
 }
 
-if ( isset( $input['bg_directory'] ) ) {
-$output['bg_directory'] = rtrim( sanitize_text_field( $input['bg_directory'] ), '/\\' );
-}
+        if ( isset( $input['bg_directory'] ) ) {
+            $output['bg_directory'] = rtrim( sanitize_text_field( $input['bg_directory'] ), '/\\' );
+        }
+
+        $output['enable_wp_login']        = ! empty( $input['enable_wp_login'] );
+        $output['enable_wc_registration'] = ! empty( $input['enable_wc_registration'] );
+        $output['enable_password_reset']  = ! empty( $input['enable_password_reset'] );
 
 return $output;
 }
@@ -133,12 +161,42 @@ $options = $this->plugin->get_options();
 <?php
 }
 
-public function render_bg_dir_field() {
-$options = $this->plugin->get_options();
-?>
-<input type="text" class="regular-text" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[bg_directory]' ); ?>" value="<?php echo esc_attr( $options['bg_directory'] ); ?>" />
-<p class="description"><?php esc_html_e( 'Путь к папке с PNG-фонами 200x50.', 'scaptcha' ); ?></p>
-<?php
-}
+    public function render_bg_dir_field() {
+        $options = $this->plugin->get_options();
+        ?>
+        <input type="text" class="regular-text" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[bg_directory]' ); ?>" value="<?php echo esc_attr( $options['bg_directory'] ); ?>" />
+        <p class="description"><?php esc_html_e( 'Путь к папке с PNG-фонами 200x50.', 'scaptcha' ); ?></p>
+        <?php
+    }
+
+    public function render_enable_wp_login_field() {
+        $options = $this->plugin->get_options();
+        ?>
+        <label>
+            <input type="checkbox" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[enable_wp_login]' ); ?>" value="1" <?php checked( $options['enable_wp_login'], true ); ?> />
+            <?php esc_html_e( 'Добавить каптчу на форму входа wp-login.php.', 'scaptcha' ); ?>
+        </label>
+        <?php
+    }
+
+    public function render_enable_wc_registration_field() {
+        $options = $this->plugin->get_options();
+        ?>
+        <label>
+            <input type="checkbox" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[enable_wc_registration]' ); ?>" value="1" <?php checked( $options['enable_wc_registration'], true ); ?> />
+            <?php esc_html_e( 'Включить каптчу на форме регистрации WooCommerce.', 'scaptcha' ); ?>
+        </label>
+        <?php
+    }
+
+    public function render_enable_password_reset_field() {
+        $options = $this->plugin->get_options();
+        ?>
+        <label>
+            <input type="checkbox" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[enable_password_reset]' ); ?>" value="1" <?php checked( $options['enable_password_reset'], true ); ?> />
+            <?php esc_html_e( 'Добавить каптчу на форму восстановления пароля.', 'scaptcha' ); ?>
+        </label>
+        <?php
+    }
 }
 
