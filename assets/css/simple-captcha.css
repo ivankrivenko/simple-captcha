@@ -1,0 +1,41 @@
+.scaptcha-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 340px;
+    flex-wrap: wrap;
+}
+
+.scaptcha-image img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    background-color: #f6f7f7;
+}
+
+.scaptcha-refresh {
+    border: 1px solid #2271b1;
+    background: #f0f6fc;
+    color: #2271b1;
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.scaptcha-refresh:hover,
+.scaptcha-refresh:focus {
+    background: #dbefff;
+    border-color: #135e96;
+}
+
+.scaptcha-wrapper input[type="text"] {
+    flex: 1 1 140px;
+    min-width: 140px;
+    padding: 8px 10px;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+}
