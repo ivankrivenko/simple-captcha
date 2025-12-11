@@ -76,19 +76,20 @@ class Simple_Captcha {
 
     private static function ensure_directories() {
         $upload_dir = wp_upload_dir();
-        $base_dir   = trailingslashit( $upload_dir['basedir'] ) . SCAPTCHA_UPLOAD_SUBDIR;
+        $digit_dir  = trailingslashit( SCAPTCHA_PLUGIN_DIR ) . 'assets/digits';
+        $bg_dir     = trailingslashit( SCAPTCHA_PLUGIN_DIR ) . 'assets/bg';
 
-        wp_mkdir_p( $base_dir . '/digits' );
-        wp_mkdir_p( $base_dir . '/bg' );
-        wp_mkdir_p( $base_dir . '/generated' );
+        wp_mkdir_p( $digit_dir );
+        wp_mkdir_p( $bg_dir );
+        wp_mkdir_p( trailingslashit( $upload_dir['basedir'] ) . SCAPTCHA_UPLOAD_SUBDIR . '/generated' );
     }
 
     public function get_options() {
         $defaults = array(
             'code_length'         => 6,
             'mode'                => 'dynamic',
-            'digit_directory'     => wp_upload_dir()['basedir'] . '/' . SCAPTCHA_UPLOAD_SUBDIR . '/digits',
-            'bg_directory'        => wp_upload_dir()['basedir'] . '/' . SCAPTCHA_UPLOAD_SUBDIR . '/bg',
+            'digit_directory'     => trailingslashit( SCAPTCHA_PLUGIN_DIR ) . 'assets/digits',
+            'bg_directory'        => trailingslashit( SCAPTCHA_PLUGIN_DIR ) . 'assets/bg',
             'enable_wp_login'     => false,
             'enable_wc_registration' => false,
             'enable_password_reset'  => false,
