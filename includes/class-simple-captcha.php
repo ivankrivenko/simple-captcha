@@ -85,13 +85,16 @@ class Simple_Captcha {
 
     public function get_options() {
         $defaults = array(
-            'code_length'     => 6,
-            'mode'            => 'dynamic',
-            'digit_directory' => wp_upload_dir()['basedir'] . '/' . SCAPTCHA_UPLOAD_SUBDIR . '/digits',
-            'bg_directory'    => wp_upload_dir()['basedir'] . '/' . SCAPTCHA_UPLOAD_SUBDIR . '/bg',
-            'enable_wp_login' => false,
+            'code_length'         => 6,
+            'mode'                => 'dynamic',
+            'digit_directory'     => wp_upload_dir()['basedir'] . '/' . SCAPTCHA_UPLOAD_SUBDIR . '/digits',
+            'bg_directory'        => wp_upload_dir()['basedir'] . '/' . SCAPTCHA_UPLOAD_SUBDIR . '/bg',
+            'enable_wp_login'     => false,
             'enable_wc_registration' => false,
             'enable_password_reset'  => false,
+            'captcha_type'        => 'custom',
+            'yandex_server_key'   => '',
+            'yandex_client_key'   => '',
         );
 
         return wp_parse_args( get_option( SCAPTCHA_OPTION_NAME, array() ), $defaults );
@@ -106,12 +109,24 @@ class Simple_Captcha {
     }
 
     public function enqueue_assets() {
+        $captcha_type = $this->get_option( 'captcha_type', 'custom' );
+
         wp_enqueue_style(
             'scaptcha-front',
             SCAPTCHA_PLUGIN_URL . 'assets/css/simple-captcha.css',
             array(),
             '1.0.0'
         );
+
+        if ( 'yandex' === $captcha_type ) {
+            wp_enqueue_script(
+                'yandex-smart-captcha',
+                'https://smartcaptcha.yandexcloud.net/captcha.js?render=onload',
+                array(),
+                null,
+                true
+            );
+        }
 
         wp_enqueue_script(
             'scaptcha-front',
@@ -125,8 +140,10 @@ class Simple_Captcha {
             'scaptcha-front',
             'SCaptcha',
             array(
-                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-                'nonce'   => wp_create_nonce( 'scaptcha_refresh' ),
+                'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+                'nonce'        => wp_create_nonce( 'scaptcha_refresh' ),
+                'captchaType'  => $captcha_type,
+                'yandexSiteKey'=> $this->get_option( 'yandex_client_key', '' ),
             )
         );
     }
@@ -145,13 +162,19 @@ class Simple_Captcha {
     }
 
     public function render_captcha_markup( $captcha ) {
+        $captcha_type = $this->get_option( 'captcha_type', 'custom' );
+
+        if ( 'yandex' === $captcha_type ) {
+            return $this->render_yandex_captcha( $captcha );
+        }
+
         if ( empty( $captcha['image_url'] ) || empty( $captcha['token'] ) ) {
             return '<p>' . esc_html__( 'Не удалось загрузить каптчу.', 'scaptcha' ) . '</p>';
         }
 
         ob_start();
         ?>
-        <div class="scaptcha-wrapper" data-token="<?php echo esc_attr( $captcha['token'] ); ?>">
+        <div class="scaptcha-wrapper" data-token="<?php echo esc_attr( $captcha['token'] ); ?>" data-provider="custom">
             <div class="scaptcha-image">
                 <img src="<?php echo esc_url( $captcha['image_url'] ); ?>" alt="captcha" width="200" height="50" loading="lazy" />
             </div>
@@ -165,7 +188,15 @@ class Simple_Captcha {
 
     public function get_captcha( $force_generate = false ) {
         $this->refresh_options();
-        $mode = $this->get_option( 'mode', 'dynamic' );
+        $mode         = $this->get_option( 'mode', 'dynamic' );
+        $captcha_type = $this->get_option( 'captcha_type', 'custom' );
+
+        if ( 'yandex' === $captcha_type ) {
+            return array(
+                'provider' => 'yandex',
+                'site_key' => $this->get_option( 'yandex_client_key', '' ),
+            );
+        }
 
         if ( ! $force_generate && 'stored' === $mode ) {
             $existing = $this->get_random_stored();
@@ -194,6 +225,7 @@ class Simple_Captcha {
         }
 
         return array(
+            'provider'  => 'custom',
             'image_url' => trailingslashit( $upload_dir['baseurl'] ) . SCAPTCHA_UPLOAD_SUBDIR . '/generated/' . $row['image_name'],
             'token'     => (int) $row['id'],
         );
@@ -251,6 +283,7 @@ class Simple_Captcha {
         $this->store_captcha( $image_name, $code );
 
         return array(
+            'provider'  => 'custom',
             'image_url' => trailingslashit( $upload_dir['baseurl'] ) . SCAPTCHA_UPLOAD_SUBDIR . '/generated/' . $image_name,
             'token'     => $this->get_last_insert_id(),
         );
@@ -332,6 +365,12 @@ class Simple_Captcha {
     }
 
     public function validate( $token, $input ) {
+        $captcha_type = $this->get_option( 'captcha_type', 'custom' );
+
+        if ( 'yandex' === $captcha_type ) {
+            return $this->validate_yandex_token( $token );
+        }
+
         global $wpdb;
 
         $token = absint( $token );
@@ -348,6 +387,60 @@ class Simple_Captcha {
         }
 
         return hash_equals( $record['code'], $input );
+    }
+
+    private function render_yandex_captcha( $captcha ) {
+        $site_key = isset( $captcha['site_key'] ) ? $captcha['site_key'] : '';
+
+        if ( empty( $site_key ) ) {
+            return '<p>' . esc_html__( 'Яндекс.Капча не настроена: укажите ключ.', 'scaptcha' ) . '</p>';
+        }
+
+        ob_start();
+        ?>
+        <div class="scaptcha-wrapper" data-provider="yandex" data-sitekey="<?php echo esc_attr( $site_key ); ?>">
+            <div class="scaptcha-yandex-container"></div>
+            <input type="hidden" name="smart-token" value="" />
+        </div>
+        <?php
+
+        return ob_get_clean();
+    }
+
+    private function validate_yandex_token( $token ) {
+        $token      = is_string( $token ) ? trim( $token ) : '';
+        $server_key = $this->get_option( 'yandex_server_key', '' );
+
+        if ( '' === $token || '' === $server_key ) {
+            return false;
+        }
+
+        $query_args = array(
+            'secret' => $server_key,
+            'token'  => $token,
+            'ip'     => isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '',
+        );
+
+        $response = wp_remote_get(
+            'https://smartcaptcha.yandexcloud.net/validate?' . http_build_query( $query_args ),
+            array(
+                'timeout' => 5,
+            )
+        );
+
+        if ( is_wp_error( $response ) ) {
+            return false;
+        }
+
+        $code = wp_remote_retrieve_response_code( $response );
+
+        if ( 200 !== $code ) {
+            return false;
+        }
+
+        $body = json_decode( wp_remote_retrieve_body( $response ) );
+
+        return isset( $body->status ) && 'ok' === $body->status;
     }
 }
 
