@@ -3,7 +3,7 @@
  * Plugin Name: Simple Folder-based Captcha
  * Description: Генерация каптчи на основе изображений цифр и интеграция с Contact Form 7.
  * Version: 1.0.0
- * Author: OpenAI Assistant
+ * Author: ivankrivenko, OpenAI Assistant
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
