@@ -38,7 +38,7 @@ array( $this, 'render_settings_page' )
 
         add_settings_field(
             'captcha_type',
-            __( 'Тип каптчи', 'scaptcha' ),
+            __( 'Тип капчи', 'scaptcha' ),
             array( $this, 'render_captcha_type_field' ),
             'scaptcha-settings',
             'scaptcha_main'
@@ -174,7 +174,7 @@ public function render_code_length_field() {
 $options = $this->plugin->get_options();
 ?>
 <input type="number" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[code_length]' ); ?>" value="<?php echo esc_attr( $options['code_length'] ); ?>" min="1" max="10" />
-<p class="description"><?php esc_html_e( 'Количество цифр в создаваемой каптче.', 'scaptcha' ); ?></p>
+<p class="description"><?php esc_html_e( 'Количество цифр в создаваемой капче.', 'scaptcha' ); ?></p>
 <?php
 }
 
@@ -221,7 +221,7 @@ $options = $this->plugin->get_options();
         ?>
         <label>
             <input type="checkbox" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[enable_wp_login]' ); ?>" value="1" <?php checked( $options['enable_wp_login'], true ); ?> />
-            <?php esc_html_e( 'Добавить каптчу на форму входа wp-login.php.', 'scaptcha' ); ?>
+            <?php esc_html_e( 'Добавить капчу на форму входа wp-login.php.', 'scaptcha' ); ?>
         </label>
         <?php
     }
@@ -231,7 +231,7 @@ $options = $this->plugin->get_options();
         ?>
         <label>
             <input type="checkbox" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[enable_wc_registration]' ); ?>" value="1" <?php checked( $options['enable_wc_registration'], true ); ?> />
-            <?php esc_html_e( 'Включить каптчу на форме регистрации WooCommerce.', 'scaptcha' ); ?>
+            <?php esc_html_e( 'Включить капчу на форме регистрации WooCommerce.', 'scaptcha' ); ?>
         </label>
         <?php
     }
@@ -241,7 +241,7 @@ $options = $this->plugin->get_options();
         ?>
         <label>
             <input type="checkbox" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[enable_password_reset]' ); ?>" value="1" <?php checked( $options['enable_password_reset'], true ); ?> />
-            <?php esc_html_e( 'Добавить каптчу на форму восстановления пароля.', 'scaptcha' ); ?>
+            <?php esc_html_e( 'Добавить капчу на форму восстановления пароля.', 'scaptcha' ); ?>
         </label>
         <?php
     }
@@ -250,7 +250,7 @@ $options = $this->plugin->get_options();
         $options = $this->plugin->get_options();
         ?>
         <input type="text" class="regular-text" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[yandex_server_key]' ); ?>" value="<?php echo esc_attr( $options['yandex_server_key'] ); ?>" />
-        <p class="description"><?php esc_html_e( 'Секретный ключ для серверной проверки токена Яндекс.Капчи.', 'scaptcha' ); ?></p>
+        <p class="description"><?php esc_html_e( 'Ключ сервера. Секретный ключ для серверной проверки токена Яндекс.Капчи.', 'scaptcha' ); ?></p>
         <?php
     }
 
@@ -258,7 +258,7 @@ $options = $this->plugin->get_options();
         $options = $this->plugin->get_options();
         ?>
         <input type="text" class="regular-text" name="<?php echo esc_attr( SCAPTCHA_OPTION_NAME . '[yandex_client_key]' ); ?>" value="<?php echo esc_attr( $options['yandex_client_key'] ); ?>" />
-        <p class="description"><?php esc_html_e( 'Ключ сайта для рендеринга виджета Яндекс.Капчи на странице.', 'scaptcha' ); ?></p>
+        <p class="description"><?php esc_html_e( 'Ключ клиента. Ключ сайта для рендеринга виджета Яндекс.Капчи на странице.', 'scaptcha' ); ?></p>
         <?php
     }
 }
