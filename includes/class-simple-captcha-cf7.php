@@ -38,6 +38,24 @@ class Simple_Captcha_CF7 {
     }
 
     public function validate( $result, $tag ) {
+        $captcha_type = $this->plugin->get_option( 'captcha_type', 'custom' );
+
+        if ( 'yandex' === $captcha_type ) {
+            $token = isset( $_POST['smart-token'] ) ? wp_unslash( $_POST['smart-token'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+            if ( empty( $token ) ) {
+                $result->invalidate( $tag, __( 'Подтвердите, что вы не робот.', 'scaptcha' ) );
+
+                return $result;
+            }
+
+            if ( ! $this->plugin->validate( $token, '' ) ) {
+                $result->invalidate( $tag, __( 'Проверка капчи не пройдена.', 'scaptcha' ) );
+            }
+
+            return $result;
+        }
+
         $token = isset( $_POST['scaptcha_token'] ) ? wp_unslash( $_POST['scaptcha_token'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
         $input = isset( $_POST['scaptcha_input'] ) ? wp_unslash( $_POST['scaptcha_input'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 

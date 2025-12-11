@@ -36,6 +36,22 @@ class Simple_Captcha_Login {
             return $user;
         }
 
+        $captcha_type = $this->plugin->get_option( 'captcha_type', 'custom' );
+
+        if ( 'yandex' === $captcha_type ) {
+            $token = isset( $_POST['smart-token'] ) ? wp_unslash( $_POST['smart-token'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+            if ( empty( $token ) ) {
+                return new WP_Error( 'scaptcha_missing', __( 'Подтвердите, что вы не робот.', 'scaptcha' ) );
+            }
+
+            if ( ! $this->plugin->validate( $token, '' ) ) {
+                return new WP_Error( 'scaptcha_invalid', __( 'Проверка капчи не пройдена.', 'scaptcha' ) );
+            }
+
+            return $user;
+        }
+
         $token = isset( $_POST['scaptcha_token'] ) ? wp_unslash( $_POST['scaptcha_token'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
         $input = isset( $_POST['scaptcha_input'] ) ? wp_unslash( $_POST['scaptcha_input'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
@@ -55,12 +71,24 @@ class Simple_Captcha_Login {
             return;
         }
 
+        $captcha_type = $this->plugin->get_option( 'captcha_type', 'custom' );
+
         wp_enqueue_style(
             'scaptcha-front',
             SCAPTCHA_PLUGIN_URL . 'assets/css/simple-captcha.css',
             array(),
             '1.0.0'
         );
+
+        if ( 'yandex' === $captcha_type ) {
+            wp_enqueue_script(
+                'yandex-smart-captcha',
+                'https://smartcaptcha.yandexcloud.net/captcha.js?render=onload',
+                array(),
+                null,
+                true
+            );
+        }
 
         wp_enqueue_script(
             'scaptcha-front',
@@ -74,8 +102,10 @@ class Simple_Captcha_Login {
             'scaptcha-front',
             'SCaptcha',
             array(
-                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-                'nonce'   => wp_create_nonce( 'scaptcha_refresh' ),
+                'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+                'nonce'        => wp_create_nonce( 'scaptcha_refresh' ),
+                'captchaType'  => $captcha_type,
+                'yandexSiteKey'=> $this->plugin->get_option( 'yandex_client_key', '' ),
             )
         );
     }
@@ -90,6 +120,24 @@ class Simple_Captcha_Login {
 
     public function validate_lostpassword_captcha( $errors ) {
         if ( ! $this->should_show_password_reset_captcha() ) {
+            return;
+        }
+
+        $captcha_type = $this->plugin->get_option( 'captcha_type', 'custom' );
+
+        if ( 'yandex' === $captcha_type ) {
+            $token = isset( $_POST['smart-token'] ) ? wp_unslash( $_POST['smart-token'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+            if ( empty( $token ) ) {
+                $errors->add( 'scaptcha_missing', __( 'Подтвердите, что вы не робот.', 'scaptcha' ) );
+
+                return;
+            }
+
+            if ( ! $this->plugin->validate( $token, '' ) ) {
+                $errors->add( 'scaptcha_invalid', __( 'Проверка капчи не пройдена.', 'scaptcha' ) );
+            }
+
             return;
         }
 
@@ -119,6 +167,24 @@ class Simple_Captcha_Login {
 
     public function validate_woocommerce_registration( $errors, $username, $email ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
         if ( ! $this->should_show_woocommerce_captcha() ) {
+            return $errors;
+        }
+
+        $captcha_type = $this->plugin->get_option( 'captcha_type', 'custom' );
+
+        if ( 'yandex' === $captcha_type ) {
+            $token = isset( $_POST['smart-token'] ) ? wp_unslash( $_POST['smart-token'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+            if ( empty( $token ) ) {
+                $errors->add( 'scaptcha_missing', __( 'Подтвердите, что вы не робот.', 'scaptcha' ) );
+
+                return $errors;
+            }
+
+            if ( ! $this->plugin->validate( $token, '' ) ) {
+                $errors->add( 'scaptcha_invalid', __( 'Проверка капчи не пройдена.', 'scaptcha' ) );
+            }
+
             return $errors;
         }
 
