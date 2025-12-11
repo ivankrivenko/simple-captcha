@@ -38,4 +38,9 @@
     padding: 8px 10px;
     border: 1px solid #dcdcde;
     border-radius: 4px;
+    font-size: 16px;
+}
+
+.scaptcha-wrapper input[type="text"]::placeholder {
+    font-size: 14px;
 }
