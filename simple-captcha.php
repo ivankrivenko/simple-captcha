@@ -23,16 +23,20 @@ define( 'SCAPTCHA_OPTION_NAME', 'scaptcha_options' );
 require_once SCAPTCHA_PLUGIN_DIR . 'includes/class-simple-captcha.php';
 require_once SCAPTCHA_PLUGIN_DIR . 'includes/class-simple-captcha-admin.php';
 require_once SCAPTCHA_PLUGIN_DIR . 'includes/class-simple-captcha-cf7.php';
+require_once SCAPTCHA_PLUGIN_DIR . 'includes/class-simple-captcha-login.php';
 
 function scaptcha_init() {
 $plugin = Simple_Captcha::get_instance();
 $plugin->register();
 
-$admin = new Simple_Captcha_Admin( $plugin );
-$admin->register();
+    $admin = new Simple_Captcha_Admin( $plugin );
+    $admin->register();
 
-$cf7 = new Simple_Captcha_CF7( $plugin );
-$cf7->register();
+    $cf7 = new Simple_Captcha_CF7( $plugin );
+    $cf7->register();
+
+    $login = new Simple_Captcha_Login( $plugin );
+    $login->register();
 }
 add_action( 'plugins_loaded', 'scaptcha_init' );
 

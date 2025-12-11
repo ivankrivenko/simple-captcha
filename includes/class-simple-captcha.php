@@ -89,6 +89,9 @@ class Simple_Captcha {
             'mode'            => 'dynamic',
             'digit_directory' => wp_upload_dir()['basedir'] . '/' . SCAPTCHA_UPLOAD_SUBDIR . '/digits',
             'bg_directory'    => wp_upload_dir()['basedir'] . '/' . SCAPTCHA_UPLOAD_SUBDIR . '/bg',
+            'enable_wp_login' => false,
+            'enable_wc_registration' => false,
+            'enable_password_reset'  => false,
         );
 
         return wp_parse_args( get_option( SCAPTCHA_OPTION_NAME, array() ), $defaults );
