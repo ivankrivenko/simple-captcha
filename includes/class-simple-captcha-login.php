@@ -55,6 +55,13 @@ class Simple_Captcha_Login {
             return;
         }
 
+        wp_enqueue_style(
+            'scaptcha-front',
+            SCAPTCHA_PLUGIN_URL . 'assets/css/simple-captcha.css',
+            array(),
+            '1.0.0'
+        );
+
         wp_enqueue_script(
             'scaptcha-front',
             SCAPTCHA_PLUGIN_URL . 'assets/js/simple-captcha.js',
